@@ -1,0 +1,29 @@
+# --- Secrets: never commit ---
+.env
+*.env
+!.env.example
+
+# --- Generated data / outputs ---
+output/
+*.csv
+*.geojson
+!data/*.geojson
+*.html
+!docs/*.html
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+build/
+dist/
+
+# --- IDE / OS ---
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
