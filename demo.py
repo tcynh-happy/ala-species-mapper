@@ -63,7 +63,7 @@ def main(argv=None) -> int:
     mapping.to_csv(df, f"{OUT_DIR}/demo_species.csv")
     mapping.to_geojson(df, f"{OUT_DIR}/demo_species.geojson")
     mapping.build_map(df, boundary, f"{OUT_DIR}/demo_map.html",
-                      title="Royal National Park — ALA species")
+                      title="Green Triangle — ALA species")
 
     print(f"\nDone. {len(df)} occurrences mapped.")
     print(f"Open {OUT_DIR}/demo_map.html in your browser.")

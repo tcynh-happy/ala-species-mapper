@@ -10,8 +10,8 @@ management, then generalised so anyone can run it on a public conservation area.
 ![Example map output](docs/preview_map.png)
 
 *Example output: recent occurrences fetched from ALA and clipped to a boundary
-polygon (Royal National Park, NSW). Open circles are records that fell inside
-the bounding box but outside the actual polygon — they are filtered out.*
+polygon — the Green Triangle plantation forestry region on the SA/VIC border.
+Markers are coloured by biological kingdom.*
 
 ---
 
@@ -38,7 +38,7 @@ study in building a **resilient data pipeline** around one of them:
 The demo uses only the **public** ALA API — no keys, no logins.
 
 ```bash
-git clone https://github.com/<tcynh-happy>/ala-species-mapper.git
+git clone https://github.com/<your-username>/ala-species-mapper.git
 cd ala-species-mapper
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
@@ -53,7 +53,9 @@ This writes three files to `output/`:
 | `demo_species.geojson` | GIS-ready points (QGIS, ArcGIS, geopandas, …) |
 | `demo_species.csv` | Flat table of every occurrence |
 
-Options: `python demo.py --months 12` to widen the look-back window.
+The Green Triangle is a large region, so the first run fetches a lot of records
+and can take a few minutes. For a quick test use a shorter window, e.g.
+`python demo.py --months 1`; use `--months 12` to widen it.
 
 ## Architecture
 
@@ -92,7 +94,7 @@ ala-species-mapper/
 │   ├── mapping.py          # CSV / GeoJSON / Folium map builders
 │   ├── arcgis_sink.py      # optional ArcGIS Online upload
 │   └── config.py           # env-based configuration
-├── data/demo_boundary.geojson   # public sample boundary
+├── data/demo_boundary.geojson   # Green Triangle sample boundary
 ├── docs/preview_map.png         # example output (above)
 ├── requirements.txt
 └── .env.example

@@ -35,7 +35,7 @@ HEALTH_CHECK_PASS = 3
 NEEDED_FIELDS = [
     "uuid", "scientificName", "vernacularName",
     "decimalLatitude", "decimalLongitude", "eventDate",
-    "images", "classs", "stateConservation", "austConservation",
+    "images", "kingdom", "classs", "stateConservation", "austConservation",
 ]
 
 # Taxa we never want (open-ocean / marine species that stray into a bbox).

@@ -1,5 +1,10 @@
 """Turn a DataFrame of occurrences into portable outputs: CSV, GeoJSON, and an
 interactive Leaflet map (via Folium) that opens in any browser.
+
+Markers are coloured by biological *kingdom* (Animalia, Plantae, Fungi, ...).
+Kingdom is used rather than the finer taxonomic class because a large region can
+contain 30+ classes, which is unreadable on one map; a handful of kingdoms keeps
+the legend clear.
 """
 from __future__ import annotations
 
@@ -13,21 +18,22 @@ from . import config
 
 log = logging.getLogger(__name__)
 
-# Colour per high-level taxon class, for map markers and legend.
-GROUP_COLOURS = {
-    "Aves": "#2166ac",          # birds
-    "Mammalia": "#8c510a",      # mammals
-    "Reptilia": "#01665e",      # reptiles
-    "Amphibia": "#5aae61",      # amphibians
-    "Plantae": "#1b7837",       # plants
-    "Magnoliopsida": "#1b7837",
-    "Insecta": "#d6604d",       # insects
+# One clear colour per kingdom, plus a fallback for anything unclassified.
+KINGDOM_COLOURS = {
+    "Animalia": "#1f78b4",   # blue
+    "Plantae": "#33a02c",    # green
+    "Fungi": "#ff7f00",      # orange
+    "Chromista": "#6a3d9a",  # purple
+    "Protozoa": "#e31a1c",   # red
+    "Protista": "#e31a1c",
+    "Bacteria": "#b15928",   # brown
+    "Archaea": "#a6761d",
 }
-DEFAULT_COLOUR = "#762a83"
+DEFAULT_COLOUR = "#999999"   # grey — unknown / unrecorded kingdom
 
 
-def _colour_for(taxon_class: str) -> str:
-    return GROUP_COLOURS.get(str(taxon_class), DEFAULT_COLOUR)
+def _colour_for(kingdom: str) -> str:
+    return KINGDOM_COLOURS.get(str(kingdom), DEFAULT_COLOUR)
 
 
 def photo_url(images_val) -> str:
@@ -41,12 +47,12 @@ def photo_url(images_val) -> str:
 
 
 def enrich(df: pd.DataFrame) -> pd.DataFrame:
-    """Add photoURL + a display date and normalise conservation columns."""
+    """Add photoURL + a display date and normalise text columns."""
     if df.empty:
         return df
     df = df.copy()
     df["photoURL"] = df["images"].apply(photo_url) if "images" in df.columns else ""
-    for col in ("stateConservation", "austConservation", "vernacularName", "classs"):
+    for col in ("stateConservation", "austConservation", "vernacularName", "classs", "kingdom"):
         if col not in df.columns:
             df[col] = ""
         df[col] = df[col].fillna("").astype(str)
@@ -74,6 +80,7 @@ def to_geojson(df: pd.DataFrame, path: str) -> None:
             "properties": {
                 "scientificName": r.get("scientificName", ""),
                 "vernacularName": r.get("vernacularName", ""),
+                "kingdom": r.get("kingdom", ""),
                 "class": r.get("classs", ""),
                 "eventDate": r.get("eventDateDisplay", ""),
                 "stateConservation": r.get("stateConservation", ""),
@@ -87,34 +94,35 @@ def to_geojson(df: pd.DataFrame, path: str) -> None:
 
 
 def build_map(df: pd.DataFrame, boundary_geom, path: str, title: str = "ALA species") -> None:
-    """Render an interactive Folium map with the boundary and coloured markers."""
+    """Render an interactive Folium map with the boundary and kingdom-coloured markers."""
     import folium  # imported here so the rest of the package works without folium
 
     minx, miny, maxx, maxy = boundary_geom.bounds
     center = [(miny + maxy) / 2, (minx + maxx) / 2]
-    fmap = folium.Map(location=center, zoom_start=12, tiles="CartoDB positron")
+    fmap = folium.Map(location=center, zoom_start=8, tiles="CartoDB positron")
 
     folium.GeoJson(
         boundary_geom.__geo_interface__,
         name="Boundary",
         style_function=lambda _: {"color": "#333", "weight": 2,
-                                  "fillColor": "#999", "fillOpacity": 0.08},
+                                  "fillColor": "#999", "fillOpacity": 0.06},
     ).add_to(fmap)
 
     for _, r in df.iterrows():
-        colour = _colour_for(r.get("classs", ""))
+        colour = _colour_for(r.get("kingdom", ""))
         photo = r.get("photoURL", "")
         img = f'<br><img src="{photo}" width="150">' if photo else ""
         popup = folium.Popup(
             f"<b><i>{r.get('scientificName','')}</i></b><br>"
             f"{r.get('vernacularName','')}<br>"
+            f"<small>{r.get('kingdom','')} · {r.get('classs','')}</small><br>"
             f"{r.get('eventDateDisplay','')}{img}",
             max_width=200,
         )
         folium.CircleMarker(
             location=[float(r["decimalLatitude"]), float(r["decimalLongitude"])],
-            radius=4, color=colour, fill=True, fill_color=colour, fill_opacity=0.8,
-            popup=popup,
+            radius=3, color=colour, fill=True, fill_color=colour, fill_opacity=0.8,
+            weight=0.5, popup=popup,
         ).add_to(fmap)
 
     _add_legend(fmap, df, title)
@@ -127,11 +135,11 @@ def build_map(df: pd.DataFrame, boundary_geom, path: str, title: str = "ALA spec
 def _add_legend(fmap, df: pd.DataFrame, title: str) -> None:
     import folium
 
-    classes = [c for c in df.get("classs", pd.Series(dtype=str)).unique() if str(c)]
+    kingdoms = [k for k in df.get("kingdom", pd.Series(dtype=str)).unique() if str(k)]
     rows = "".join(
-        f'<div><span style="background:{_colour_for(c)};width:10px;height:10px;'
-        f'display:inline-block;border-radius:50%;margin-right:6px;"></span>{c}</div>'
-        for c in sorted(classes)
+        f'<div><span style="background:{_colour_for(k)};width:10px;height:10px;'
+        f'display:inline-block;border-radius:50%;margin-right:6px;"></span>{k}</div>'
+        for k in sorted(kingdoms)
     )
     html = (
         f'<div style="position:fixed;bottom:24px;left:24px;z-index:9999;'
