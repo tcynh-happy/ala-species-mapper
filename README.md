@@ -38,7 +38,7 @@ study in building a **resilient data pipeline** around one of them:
 The demo uses only the **public** ALA API — no keys, no logins.
 
 ```bash
-git clone https://github.com/<your-username>/ala-species-mapper.git
+git clone https://github.com/<tcynh-happy>/ala-species-mapper.git
 cd ala-species-mapper
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
