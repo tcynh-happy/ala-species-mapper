@@ -1,0 +1,11 @@
+# Core dependencies — enough to run the zero-auth demo (python demo.py)
+requests>=2.31
+pandas>=2.0
+shapely>=2.0
+folium>=0.16
+python-dotenv>=1.0
+
+# Optional — only needed for the full ArcGIS Online pipeline (python main.py).
+# Install separately if you use it:
+#   pip install arcgis
+# arcgis>=2.3

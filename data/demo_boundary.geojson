@@ -1,0 +1,32 @@
+{
+  "type": "FeatureCollection",
+  "name": "demo_boundary_royal_national_park",
+  "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Royal National Park (approximate)",
+        "note": "Simplified public boundary used for demonstration only, not survey-accurate."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [151.010, -34.070],
+          [151.055, -34.062],
+          [151.100, -34.070],
+          [151.150, -34.090],
+          [151.165, -34.120],
+          [151.150, -34.150],
+          [151.120, -34.180],
+          [151.075, -34.198],
+          [151.030, -34.190],
+          [151.005, -34.160],
+          [150.998, -34.120],
+          [151.002, -34.090],
+          [151.010, -34.070]
+        ]]
+      }
+    }
+  ]
+}
